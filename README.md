@@ -455,7 +455,12 @@ pengujian dilakukan di client menggunakan lynx
 ## Soal 12 
 #### Setelah itu ubahlah agar url www.abimanyu.yyy.com/index.php/home menjadi www.abimanyu.yyy.com/home.
 
-Dengan langkah yang sama seperti nomer 11 maka akan dihasilkan seperti berikut
+Ubah konfigurasi pada `/etc/apache2/sites-available/abimanyuf02.conf` dengan menambahkan baris berikut
+
+```
+Alias "/home" "/var/www/abimanyu.f02/index.php/home"
+```
+Kemudian restart dan akan menghasilkan seperti berikut
 
 ## Soal 13
 #### Selain itu, pada subdomain www.parikesit.abimanyu.yyy.com, DocumentRoot disimpan pada /var/www/parikesit.abimanyu.yyy
@@ -470,3 +475,47 @@ Dengan langkah yang sama seperti dengan soal 11 dengan perubahan konfigurasi pad
 
 ## Soal 14
 #### Pada subdomain tersebut folder /public hanya dapat melakukan directory listing sedangkan pada folder /secret tidak dapat diakses (403 Forbidden).
+
+Ubah kofigurasi pada `/etc/apache2/sites-available/parikesitabimanyu.conf` dengan menambahkan baris berikut
+```
+<Directory /var/www/parikesit.abimanyu.f02.com/public>
+		Options +Indexes
+</Directory>
+
+<Directory /var/www/parikesit.abimanyu.f02.com/secret>
+	Options -Indexes
+</Directory>
+```
+Restart dan coba akses halaman secret maka akan menghasilkan 403 Forbidden
+
+## Soal 15
+#### Buatlah kustomisasi halaman error pada folder /error untuk mengganti error kode pada Apache. Error kode yang perlu diganti adalah 404 Not Found dan 403 Forbidden.
+
+Ubah kofigurasi pada `/etc/apache2/sites-available/parikesitabimanyu.conf` dengan menambahkan baris berikut
+```
+ErrorDocument 403 /error/403.html
+ErrorDocument 404 /error/404.html
+```
+
+kemudian restart dan uji coba dilakukan di client dengan 2 cara mengakses direktori secret untuk kode error 403 dan mengakses direktori adibsyam kode error 404
+```
+lynx parikesit.abimanyu.f02.com/secret
+lynx parikesit.abimanyu.f02.com/adibsyam
+```
+
+Berikut adalah hasil error 403 forbidden
+
+
+Berikut adalah hasil error 404 Not Found
+
+
+## Soal 16
+#### Buatlah suatu konfigurasi virtual host agar file asset www.parikesit.abimanyu.yyy.com/public/js menjadi www.parikesit.abimanyu.yyy.com/js 
+
+Ubah konfigurasi pada `/etc/apache2/sites-available/parikesitabimanyu.conf` dengan menambahkan baris berikut
+
+```
+Alias "/js" "/var/www/parikesit.abimanyu.f02,com/public/js"
+```
+Kemudian restart dan akan menghasilkan seperti berikut
+
