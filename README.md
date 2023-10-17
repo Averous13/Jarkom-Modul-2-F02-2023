@@ -519,3 +519,47 @@ Alias "/js" "/var/www/parikesit.abimanyu.f02,com/public/js"
 ```
 Kemudian restart dan akan menghasilkan seperti berikut
 
+## Soal 17
+#### Agar aman, buatlah konfigurasi agar www.rjp.baratayuda.abimanyu.yyy.com hanya dapat diakses melalui port 14000 dan 14400.
+
+- Untuk konfigurasinya sama dengan abimanyu tetapi diubah pada menjadi `<listen *:14000 *14400>` dan diubah baris berikut:
+```
+ 	ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/rjp.baratayuda.abimanyu.f02
+	ServerName rjp.baratayuda.abimanyu.f02.com
+	ServerAlias www.rjp.baratayuda.abimanyu.f02.com
+```
+
+- Kemudian tambahkan konfigurasi file `/etc/apache/ports.conf` dengan
+```
+Listen 14000
+Listen 14400
+```
+- Untuk resource yang diperlukan kita dapatkan melalui wget dan kemudian di ekstrak
+- restart apache untuk mengaktifkan konfigurasi terbaru
+- Hasil pemgujian dengan menggunakan `lynx rjp.baratayuda.abimanyu.f02.com:14000`
+
+## Soal 18
+#### Untuk mengaksesnya buatlah autentikasi username berupa “Wayang” dan password “baratayudayyy” dengan yyy merupakan kode kelompok. Letakkan DocumentRoot pada /var/www/rjp.baratayuda.abimanyu.yyy.
+
+- Untuk membuat username wayang dan password yang diletakkan pada file "/etc/apache2/.htpasswd" menggunakan command
+```
+echo "baratayudaf10" | htpasswd -ci /etc/apache2/.htpasswd Wayang
+```
+- Mengaktifkan mode autentikasi dengan command `a2enmod auth_basic` dan `a2enmod authn_file`
+- Menambahkan konfigurasi virtualHost file "rjp.baratayuda.abimanyu.f02.conf" seperti berikut:
+```
+<Directory /var/www/rjp.baratayuda.abimanyu.f02>
+	AuthType Basic
+	AuthName "Private Area"
+	AuthUserFile /etc/apache2/.htpasswd
+	Require valid-user
+</Directory>
+```
+- Restart apache untuk mengaktifkan konfigurasi baru
+
+## Soal 19
+#### Buatlah agar setiap kali mengakses IP dari Abimanyu akan secara otomatis dialihkan ke www.abimanyu.yyy.com (alias)
+
+## Soal 20
+#### Karena website www.parikesit.abimanyu.yyy.com semakin banyak pengunjung dan banyak gambar gambar random, maka ubahlah request gambar yang memiliki substring “abimanyu” akan diarahkan menuju abimanyu.png.
