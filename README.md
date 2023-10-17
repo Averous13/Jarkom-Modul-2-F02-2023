@@ -216,3 +216,104 @@ host -t PTR 192.222.3.4
 
 ## Soal 6
 #### Agar dapat tetap dihubungi ketika DNS Server Yudhistira bermasalah, buat juga Werkudara sebagai DNS Slave untuk domain utama.
+
+- Pembuatan DNS Slave perlu mengubah konfigurasi pada `etc/bind/named.conf.local` dengan seperti berikut:
+```
+zone "arjuna.f02.com" {
+	type master;
+    notify yes;
+	also-notify { 192.226.2.2; };	// IP Werkudara
+    allow-transfer { 192.226.2.2; };	// IP Werkudara
+	file "/etc/bind/praktikum2/arjuna.f02.com";
+};
+
+zone "abimanyu.f02.com" {
+	type master;
+    notify yes;
+	also-notify { 192.222.2.2; };	// IP Werkudara
+    allow-transfer { 192.222.2.2; };	// IP Werkudara
+	file "/etc/bind/praktikum2/abimanyu.f02.com";
+};
+
+zone "3.222.192.in-addr.arpa" {
+    type master;
+	notify yes;
+	also-notify { 192.222.2.2; };	// IP Werkudara
+    allow-transfer { 192.222.2.2; };	// IP Werkudara
+    file "/etc/bind/praktikum2/3.222.192.in-addr.arpa";
+};
+```
+- Restart bind9 untuk mengaplikasikan perubahan
+- Pada node Werkudara lakukan instalasi package yang sama dengan Yudishtira kemudian ubah pada `/etc/bind/named.conf.local`
+
+```
+zone "arjuna.f02.com" {
+	type slave;
+    masters { 192.222.2.2; }; // IP Yudhistira
+	file "/var/lib/praktikum2/arjuna.f02.com";
+};
+
+zone "abimanyu.f02.com" {
+	type slave;
+    masters { 192.226.2.2; }; // IP Yudhistira
+	file /var/lib/praktikum2/abimanyu.f02.com";
+};
+
+zone "3.222.192.in-addr.arpa" {
+	type slave;
+    masters { 192.222.2.2; }; // IP Yudhistira
+	file /var/lib/praktikum2//3.226.192.in-addr.arpa";
+};
+```
+- Restart bind9 dan matikan terlebih dahulu Yudhistira sebagai pengujian DNS slave berhasil dengan command `service bind9 stop`
+
+![dnsslave](dnsslave.png)
+
+## Soal 7
+#### Seperti yang kita tahu karena banyak sekali informasi yang harus diterima, buatlah subdomain khusus untuk perang yaitu baratayuda.abimanyu.yyy.com dengan alias www.baratayuda.abimanyu.yyy.com yang didelegasikan dari Yudhistira ke Werkudara dengan IP menuju ke Abimanyu dalam folder Baratayuda.
+
+- Subdomain yang akan kita delegasikan dibuat dengan mengubah konfigurasi `/etc/bind/praktikum2/abimanyu.f02.com` dengan menambahkan record seperti berikut:
+```
+ns1		IN	A	192.222.2.3		; IP Werkudara
+baratayuda	IN	NS	ns1
+```
+- Pada node yang didelegasikan kita ubah konfigurasi `/etc/bind/delegasi/praktikum2/baratayuda.abimanyu.f02.com` seperti berikut:
+```
+; BIND data file for local loopback interface
+;
+$TTL	604800
+@	IN	SOA	baratayuda.abimanyu.f02.com. root.baratayuda.abimanyu.f02.com. (
+			2023101101	; Serial
+			604800		; Refresh
+			86400		; Retry
+			2419200		; Expire
+			604800 )	; Negative Cache TTL
+;
+@	IN	NS	baratayuda.abimanyu.f10.com.
+@	IN	A	192.222.3.4	; IP Abimanyu
+www IN  CNAME   baratayuda.abimanyu.f02.com.'
+```
+
+- Ubah file `/etc/bind/named.conf.options` yaitu dengan  comment `dnssec-validation auto;` dan tambahkan `allow-query{any;};` dibawahnya
+- tambahkan juga pada `etc/bind/named.conf.local` seperti berikut:
+```
+zone "baratayuda.abimanyu.f02.com" {
+    type master;
+    file "/etc/bind/delegasi/baratayuda.abimanyu.f02.com";
+};
+```
+- Pengujian dilakukan dengan ping baratayuda.abimanyu.f02.com dan ping www.baratayuda.abimanyu.f02.com
+
+![barat](baratayuda.png)
+
+## Soal 8 
+#### Untuk informasi yang lebih spesifik mengenai Ranjapan Baratayuda, buatlah subdomain melalui Werkudara dengan akses rjp.baratayuda.abimanyu.yyy.com dengan alias www.rjp.baratayuda.abimanyu.yyy.com yang mengarah ke Abimanyu.
+
+Untuk membuat subdomain tersebut melalui werkudara kita hanya perlu menambahkan record berikut pada `/etc/bind/praktikum2/baratayuda.abimanyu.f02.com`
+```
+rjp	IN	A	192.222.3.4	; IP Abimanyu
+www.rjp IN	CNAME	rjp.baratayuda.abimanyu.f02.com.
+```
+
+## Soal 9
+#### Arjuna merupakan suatu Load Balancer Nginx dengan tiga worker (yang juga menggunakan nginx sebagai webserver) yaitu Prabakusuma, Abimanyu, dan Wisanggeni. Lakukan deployment pada masing-masing worker.
