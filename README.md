@@ -402,7 +402,7 @@ server {
 kemudian buat symlink dengan command `ln -s /etc/nginx/sites-available/lb-arjunaf02 /etc/nginx/sites-enabled` dan restart nginx
 pengujian dilakukan di client menggunakan lynx 
 
-![workerwis](workerwisanggeni.png)
+![workerwis](workerwisa.png)
 
 ![workerab](workerabi.png)
 
