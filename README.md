@@ -452,6 +452,8 @@ pengujian dilakukan di client menggunakan lynx
 - Mengaktifkan konfigurasi dengan perintah `a2ensite abimanyuf02`
 - Merestart web server apache2 dengan perintah `service apache2 restart`
 
+![abimap](abimanyu1112.png)
+
 ## Soal 12 
 #### Setelah itu ubahlah agar url www.abimanyu.yyy.com/index.php/home menjadi www.abimanyu.yyy.com/home.
 
@@ -461,6 +463,8 @@ Ubah konfigurasi pada `/etc/apache2/sites-available/abimanyuf02.conf` dengan men
 Alias "/home" "/var/www/abimanyu.f02/index.php/home"
 ```
 Kemudian restart dan akan menghasilkan seperti berikut
+
+![abimaphome](abimanyu1112.png)
 
 ## Soal 13
 #### Selain itu, pada subdomain www.parikesit.abimanyu.yyy.com, DocumentRoot disimpan pada /var/www/parikesit.abimanyu.yyy
@@ -472,6 +476,8 @@ Dengan langkah yang sama seperti dengan soal 11 dengan perubahan konfigurasi pad
 	ServerName parikesit.abimanyu.f02.com
 	ServerAlias www.parikesit.abimanyu.f02.com
 ```
+
+![apari](pariapache.png)
 
 ## Soal 14
 #### Pada subdomain tersebut folder /public hanya dapat melakukan directory listing sedangkan pada folder /secret tidak dapat diakses (403 Forbidden).
@@ -487,6 +493,8 @@ Ubah kofigurasi pada `/etc/apache2/sites-available/parikesitabimanyu.conf` denga
 </Directory>
 ```
 Restart dan coba akses halaman secret maka akan menghasilkan 403 Forbidden
+
+![sec](secret.png)
 
 ## Soal 15
 #### Buatlah kustomisasi halaman error pada folder /error untuk mengganti error kode pada Apache. Error kode yang perlu diganti adalah 404 Not Found dan 403 Forbidden.
@@ -505,9 +513,11 @@ lynx parikesit.abimanyu.f02.com/adibsyam
 
 Berikut adalah hasil error 403 forbidden
 
+![forbid](forbid.png)
 
 Berikut adalah hasil error 404 Not Found
 
+![error](404.png)
 
 ## Soal 16
 #### Buatlah suatu konfigurasi virtual host agar file asset www.parikesit.abimanyu.yyy.com/public/js menjadi www.parikesit.abimanyu.yyy.com/js 
@@ -517,7 +527,13 @@ Ubah konfigurasi pada `/etc/apache2/sites-available/parikesitabimanyu.conf` deng
 ```
 Alias "/js" "/var/www/parikesit.abimanyu.f02,com/public/js"
 ```
-Kemudian restart dan akan menghasilkan seperti berikut
+Kemudian restart dan akan menghasilkan seperti berikut untuk alias js
+
+![af](afjs.png)
+
+perbandingan dengan sebelumnya
+
+![bef](befjs.png)
 
 ## Soal 17
 #### Agar aman, buatlah konfigurasi agar www.rjp.baratayuda.abimanyu.yyy.com hanya dapat diakses melalui port 14000 dan 14400.
@@ -539,6 +555,8 @@ Listen 14400
 - restart apache untuk mengaktifkan konfigurasi terbaru
 - Hasil pemgujian dengan menggunakan `lynx rjp.baratayuda.abimanyu.f02.com:14000`
 
+![baraapache](baraapache.png)
+
 ## Soal 18
 #### Untuk mengaksesnya buatlah autentikasi username berupa “Wayang” dan password “baratayudayyy” dengan yyy merupakan kode kelompok. Letakkan DocumentRoot pada /var/www/rjp.baratayuda.abimanyu.yyy.
 
@@ -557,6 +575,14 @@ echo "baratayudaf10" | htpasswd -ci /etc/apache2/.htpasswd Wayang
 </Directory>
 ```
 - Restart apache untuk mengaktifkan konfigurasi baru
+
+Halaman login
+
+![login](login.png)
+
+Memasukan password
+
+![password](password.png)
 
 ## Soal 19
 #### Buatlah agar setiap kali mengakses IP dari Abimanyu akan secara otomatis dialihkan ke www.abimanyu.yyy.com (alias)
