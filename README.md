@@ -10,6 +10,7 @@ Laporan resmi praktikum modul 2 jaringan komputer 2023
 
 Berikut adalah topologi yang kelompok kami gunakan 
 
+![topo](topo.png)
 
 Adapun konfigurasi untuk tiap node seperti berikut
 
@@ -587,5 +588,47 @@ Memasukan password
 ## Soal 19
 #### Buatlah agar setiap kali mengakses IP dari Abimanyu akan secara otomatis dialihkan ke www.abimanyu.yyy.com (alias)
 
+Untuk mengalihkannya maka perlu diubah konfigurasi default dari apache dengan seperti berikut:
+```
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/abimanyu.f02.com
+	ServerName abimanyu.f02.com
+
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet"
+```
+
+![19](19.png)
+
 ## Soal 20
 #### Karena website www.parikesit.abimanyu.yyy.com semakin banyak pengunjung dan banyak gambar gambar random, maka ubahlah request gambar yang memiliki substring “abimanyu” akan diarahkan menuju abimanyu.png.
+
+Adapun langkah untuk mengarahkan ke abimanyu.png sebagai berikut
+
+- Menambahkan hal berikut ke konfigurasi virtualHost file "parikesitabimanyu.conf"
+```
+<Directory /var/www/parikesit.abimanyu.f02.com>
+	Options +FollowSymLinks -Multiviews
+	AllowOverride All
+</Directory>
+```
+- Membuat file .htaccess pada folder "/var/www/parikesit.abimanyu.f02" dengan konfigurasi berikut
+```
+RewriteEngine On
+
+RewriteCond %{REQUEST_URI} abimanyu [NC]
+RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif)$ [NC]
+RewriteCond %{REQUEST_URI} !/public/images/abimanyu.png
+
+RewriteRule ^(.*)$ /public/images/abimanyu.png [R=301,L]
+```
+- Kemudian lakukan `a2enmod rewrite` dan `service apache2 restart`
+
+maka akan dihasilkan 
+
+![20](20.png)
