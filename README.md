@@ -315,5 +315,158 @@ rjp	IN	A	192.222.3.4	; IP Abimanyu
 www.rjp IN	CNAME	rjp.baratayuda.abimanyu.f02.com.
 ```
 
+Berikut hasil pengujian
+
+![rjp](rjp.png)
+
 ## Soal 9
 #### Arjuna merupakan suatu Load Balancer Nginx dengan tiga worker (yang juga menggunakan nginx sebagai webserver) yaitu Prabakusuma, Abimanyu, dan Wisanggeni. Lakukan deployment pada masing-masing worker.
+
+- Pada arjuna kita instal terlebih dahulu nginx dan bind9 dengan command
+```
+apt-get update
+apt-get install nginx bind9 -y
+```
+- Kemudian pada tiap worker install nginx php dan php-fpm
+```
+apt-get update
+apt-get install bind9 nginx -y
+apt-get install php -y
+apt-get install php-fpm -y
+
+```
+
+- Setelah semua keperluan siap, unduh file zip yang telah disediakan soal dengan wget dan extract hasil unduhan.
+- Hapus file yang telah diekstrak untuk menghemat penyimpanan dan ganti nama file hasil ekstrak dengan arjuna.f02.com
+- Buat file konfigurasi pada `/etc/nginx/sites-available` dengan nama arjuna yang berisi seperti berikut:
+```
+'server {
+
+	listen 800x;
+
+	root /var/www/arjuna.f02.com;
+
+	index index.php index.html index.htm;
+	server_name _;
+
+	location / {
+			try_files $uri $uri/ /index.php?$query_string;
+	}
+
+	# pass PHP scripts to FastCGI server
+	location ~ \.php$ {
+	include snippets/fastcgi-php.conf;
+	fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+	}
+
+location ~ /\.ht {
+			deny all;
+	}
+
+	error_log /var/log/nginx/arjuna_error.log;
+	access_log /var/log/nginx/arjuna_access.log;
+}
+```
+- Port yang digunakan urut dari 8001-8003
+- Nyalakan service dari php-fpm dengan `service php7.2-fpm start`
+- buat symlink dengan command `ln -s /etc/nginx/sites-available/arjuna /etc/nginx/sites-enabled`
+- restart nginx dan jalankan dengan command
+```
+service nginx restart
+nginx -t
+```
+
+![work](worker.png)
+
+## Soal 10
+#### Kemudian gunakan algoritma Round Robin untuk Load Balancer pada Arjuna. Gunakan server_name pada soal nomor 1. Untuk melakukan pengecekan akses alamat web tersebut kemudian pastikan worker yang digunakan untuk menangani permintaan akan berganti ganti secara acak. Untuk webserver di masing-masing worker wajib berjalan di port 8001-8003. Contoh- Prabakusuma:8001, Abimanyu:8002, Wisanggeni:8003
+
+Buat konfigurasi pada directory `/etc/nginx/sites-available/lb-arjunaf02`
+```
+ # Default menggunakan Round Robin
+upstream myweb  {
+        server 192.222.3.3:8001; #IP Wisanggeni
+        server 192.222.3.4:8002; #IP Abimanyu
+        server 192.222.3.5:8003; #IP Prabukusuma
+}
+
+server {
+        listen 80;
+        server_name arjuna.f02.com;
+
+        location / {
+        proxy_pass http://myweb;
+        }
+}
+```
+kemudian buat symlink dengan command `ln -s /etc/nginx/sites-available/lb-arjunaf02 /etc/nginx/sites-enabled` dan restart nginx
+pengujian dilakukan di client menggunakan lynx 
+
+![workerwis](workerwisanggeni.png)
+
+![workerab](workerabi.png)
+
+![workerpra](workerpra.png)
+
+## Soal 11
+#### Selain menggunakan Nginx, lakukan konfigurasi Apache Web Server pada worker Abimanyu dengan web server www.abimanyu.yyy.com. Pertama dibutuhkan web server dengan DocumentRoot pada /var/www/abimanyu.yyy
+
+- Salin konfigurasi default apache (file 000-default.conf) pada folder "/etc/apache2/sites-available" dengan nama file "abimanyuf02.conf" ke folder yang sama 
+- Mendownload resource dari google drive dan unzip ke folder "/var/www/abimanyu.f02" sebagai document root dengan command wget dan unzip
+- Membuat konfigurasi abimanyuf02.conf seperti berikut:
+```
+<VirtualHost *:80>
+        # The ServerName directive sets the request scheme, hostname and port that
+        # the server uses to identify itself. This is used when creating
+        # redirection URLs. In the context of virtual hosts, the ServerName
+        # specifies what hostname must appear in the request's Host: header to
+        # match this virtual host. For the default virtual host (this file) this
+        # value is not decisive as it is used as a last resort host regardless.
+        # However, you must set it for any further virtual host explicitly.
+        #ServerName www.example.com
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/abimanyu.f02.com
+	ServerName abimanyu.f02.com
+	ServerAlias www.abimanyu.f02.com
+
+        # Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+        # error, crit, alert, emerg.
+        # It is also possible to configure the loglevel for particular
+        # modules, e.g.
+        #LogLevel info ssl:warn
+
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+
+        # For most configuration files from conf-available/, which are
+        # enabled or disabled at a global level, it is possible to
+        # include a line for only one particular virtual host. For example the
+        # following line enables the CGI configuration for this host only
+        # after it has been globally disabled with \"a2disconf\".
+        #Include conf-available/serve-cgi-bin.conf
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+```
+- Mengaktifkan konfigurasi dengan perintah `a2ensite abimanyuf02`
+- Merestart web server apache2 dengan perintah `service apache2 restart`
+
+## Soal 12 
+#### Setelah itu ubahlah agar url www.abimanyu.yyy.com/index.php/home menjadi www.abimanyu.yyy.com/home.
+
+Dengan langkah yang sama seperti nomer 11 maka akan dihasilkan seperti berikut
+
+## Soal 13
+#### Selain itu, pada subdomain www.parikesit.abimanyu.yyy.com, DocumentRoot disimpan pada /var/www/parikesit.abimanyu.yyy
+
+Dengan langkah yang sama seperti dengan soal 11 dengan perubahan konfigurasi pada `/etc/apache2/sites-available/parkesitabimanyu.conf` dengan mengubah 
+```
+	ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/parikesit.abimanyu.f02.com
+	ServerName parikesit.abimanyu.f02.com
+	ServerAlias www.parikesit.abimanyu.f02.com
+```
+
+## Soal 14
+#### Pada subdomain tersebut folder /public hanya dapat melakukan directory listing sedangkan pada folder /secret tidak dapat diakses (403 Forbidden).
